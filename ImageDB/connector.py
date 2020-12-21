@@ -32,3 +32,6 @@ class Connector:
     def get_cursor(self) -> psycopg2._psycopg.cursor:
         return self.db.cursor()
 
+    def db_commit(self):
+        self.db.commit()
+

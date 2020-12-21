@@ -28,3 +28,11 @@ class ImageDB:
         table_name = self.connector.db_id
         cur = self.connector.get_cursor()
         cur.execute("INSERT INTO {table_name} (filepath, filename, chksum) VALUES ({filepath}, {filename}, None)")
+
+    def get_image(self):
+        cur = self.connector.get_cursor()
+        cur.execute("")
+
+    def get_images(self):
+        cur = self.connector.get_cursor()
+        cur.execute("")
