@@ -11,5 +11,6 @@ setuptools.setup(
     license='GPT',
     python_requires='>=3.6',
     install_requires=[
+        "psycopg2"
     ]
 )
