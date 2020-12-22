@@ -2,7 +2,7 @@
 imagedb is one of the core services of ImageDB, it is responsible for insert image metadata into
 PostgresSQL and retrieve image data.
 
-To avoid extensive I/O, imagedb in default return the filepath but not the actual image (perhaps in a np.array form).
+To avoid extensive I/O, imagedb in default return the filepath but not the actual image.
 """
 
 import cv2
@@ -60,13 +60,21 @@ class ImageDB:
         md5hash = hashlib.md5(Image.open(file_path).tobytes())
         return md5hash
 
-    def get_image(self, dataset_id, image_id=None, file_name=None):
+    def get_image(self, dataset_id, image_id=None, file_name=None, refresh=False) -> list:
+        """
+        get image based on id or filename from a dataset
+        :param dataset_id: the name of the dataset
+        :param image_id: the id of the image
+        :param file_name: the filename of the image
+        :param refresh: skip the cache if true
+        :return: [(image_id, filepath, filename, chksum), ...]
+        """
 
         # if the cache function is turned on, then first find from the cache
-        if self.query_cache_flag and ((dataset_id, image_id, file_name) in self.query_cache):
+        if self.query_cache_flag and ((dataset_id, image_id, file_name) in self.query_cache) and (not refresh):
             return self.query_cache[(dataset_id, image_id, file_name)]
 
-        # get image based on id or filename from a dataset
+        #
         assert image_id or file_name, 'Image id or the file name should provide at least one'
         cur = self.connector.get_cursor()
         if image_id:
@@ -75,13 +83,32 @@ class ImageDB:
             cur.execute(f'SELECT * FROM {dataset_id} WHERE filename = {file_name}')
 
         query_result = cur.fetchall()
+
+        # if the cache function is turned on, store the result
         if self.query_cache_flag:
-            self.query_cache[(dataset_id, image_id, file_name)] = query_result
+            self.query_cache[('get_image', dataset_id, image_id, file_name)] = query_result
 
         return query_result
 
-    def get_images(self, dataset_id):
+    def get_images(self, dataset_id, refresh=False) -> list:
+        """
+        get all images from a dataset based on the name of dataset
+        :param dataset_id: the name of the dataset
+        :param refresh: skip the cache if true
+        :return: [(image_id, filepath, filename, chksum), ...]
+        """
+
+        # if the cache function is turned on, then first find from the cache
+        if self.query_cache_flag and (('get_images', dataset_id) in self.query_cache) and (not refresh):
+            return self.query_cache[('get_images', dataset_id)]
+
         # get all the image form a dataset
         cur = self.connector.get_cursor()
         cur.execute(f"SELECT * FROM {dataset_id};")
-        return cur.fetchall()
+        query_result = cur.fetchall()
+
+        # if the cache function is turned on, store the result
+        if self.query_cache_flag:
+            self.query_cache[('get_images', dataset_id)] = query_result
+
+        return query_result
