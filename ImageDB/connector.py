@@ -10,26 +10,30 @@ import time
 
 class Connector:
 
-    def __init__(self, db_id, user_id):
+    def __init__(self, db_id, user_id, password):
         self.db = None
         self.db_id = db_id
         self.user_id = user_id
+        self.password = password
         self.timer = None
         self.status = None
         self.status_map = {1: "connect", 0: "disconnect"}
 
-    def connect(self, dbname=None, user=None):
+    def connect(self, dbname=None, user=None, password=None):
         try:
-            if dbname and user:
-                self.db = psycopg2.connect(f'dbname={dbname} username={user}')
+            if dbname and user and password:
+                self.db = psycopg2.connect(f'dbname={dbname} user={user} password={password}')
+            elif dbname:
+                self.db = psycopg2.connect(f'dbname={dbname}')
             else:
-                self.db = psycopg2.connect(f'dbname={self.db_id} username={self.user_id}')
+                self.db = psycopg2.connect(f'dbname={self.db_id} user={self.user_id} password={self.password}')
         except ValueError:
             print('Wrong database name or username')
         finally:
             # log the error
             pass
 
+        self.status = 1
         self.timer = time.time()
 
     def isconnect(self):

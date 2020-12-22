@@ -16,8 +16,8 @@ from ImageDB.connector import Connector
 
 class ImageDB:
 
-    def __init__(self, db_id: str, user_id: str, query_cache: bool):
-        self.connector = Connector(db_id=db_id, user_id=user_id)
+    def __init__(self, db_id: str, user_id: str, password: str, query_cache: bool):
+        self.connector = Connector(db_id=db_id, user_id=user_id, password=password)
 
         if ~self.connector.isconnect():
             self.connector.connect()
@@ -39,25 +39,22 @@ class ImageDB:
 
         # currently the schema of a dataset will store the information of
         # image file with id, filepath, filename, and chksum
-        cur.execute(f"CREATE TABLE {dataset_id} (image_id serial PRIMARY KEY,"
-                    f" filepath varchar , filename varchar, chksum varchar );")
+        cur.execute(f"CREATE TABLE {dataset_id:%s} (image_id serial PRIMARY KEY, filepath varchar , filename varchar, chksum varchar );")
 
-    def add_image(self, filepath, checksum=False):
+    def add_image(self, dataset_id, filepath, checksum=False):
         # assert the file existence
         # default to close the checksum mechanism to avoid long processed time
 
-        assert os.path.isdir(filepath), "The file not exists"
+        assert os.path.isfile(filepath), "The file not exists"
 
         filename = filepath.split("/")[-1]
-        table_name = self.connector.db_id
         cur = self.connector.get_cursor()
 
         # create MD5 for image file
         img_checksum = None
         if checksum:
             img_checksum = self.image_hashmap(file_path=filepath)
-        cur.execute(f"INSERT INTO {table_name} (filepath, filename, chksum)"
-                    f" VALUES ({filepath}, {filename}, {img_checksum})")
+        cur.execute(f"INSERT INTO {dataset_id} (filepath, filename, chksum) VALUES ({filepath:%s}, {filename:%s}, {img_checksum:%s})")
 
     @staticmethod
     def image_hashmap(file_path):
