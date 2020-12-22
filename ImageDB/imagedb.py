@@ -122,5 +122,14 @@ class ImageDB:
                       dataset_id: str = None,
                       image_id: str = None, file_name: str = None,
                       checksum: bool = False, refresh_query: bool = False):
+        """
+        scan the database and validate the data
+        :param dataset_id:
+        :param image_id:
+        :param file_name:
+        :param checksum:
+        :param refresh_query:
+        :return:
+        """
 
         return
