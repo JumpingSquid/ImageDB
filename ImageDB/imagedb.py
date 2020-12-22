@@ -39,7 +39,7 @@ class ImageDB:
 
         # currently the schema of a dataset will store the information of
         # image file with id, filepath, filename, and chksum
-        cur.execute(f"CREATE TABLE {dataset_id:%s} (image_id serial PRIMARY KEY, filepath varchar , filename varchar, chksum varchar );")
+        cur.execute(f"CREATE TABLE {dataset_id} (image_id serial PRIMARY KEY, filepath varchar , filename varchar, chksum varchar );")
 
     def add_image(self, dataset_id, filepath, checksum=False):
         # assert the file existence
@@ -54,7 +54,7 @@ class ImageDB:
         img_checksum = None
         if checksum:
             img_checksum = self.image_hashmap(file_path=filepath)
-        cur.execute(f"INSERT INTO {dataset_id} (filepath, filename, chksum) VALUES ({filepath:%s}, {filename:%s}, {img_checksum:%s})")
+        cur.execute(f"INSERT INTO {dataset_id} (filepath, filename, chksum) VALUES ('{filepath}', '{filename}', '{img_checksum}')")
 
     @staticmethod
     def image_hashmap(file_path):
