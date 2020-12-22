@@ -1,3 +1,9 @@
+"""
+Connector is an interface to communicate between ImageDB core and PostgresSQL database.
+The connector will handle any execution related to PostgresSQL but itself does not produce any
+execution unless called by other modules (passive service).
+"""
+
 import psycopg2
 import time
 
