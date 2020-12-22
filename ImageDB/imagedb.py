@@ -1,6 +1,6 @@
 """
 imagedb is one of the core services of ImageDB, it is responsible for insert image metadata into
-PostgresSQL and retrieve image data.
+PostgresSQL and export image file path.
 
 To avoid extensive I/O, imagedb in default return the filepath but not the actual image.
 """
@@ -27,6 +27,11 @@ class ImageDB:
         # now it only stores in the memory and lose the information once restarted
         self.query_cache_flag = query_cache
         self.query_cache = {}
+
+        # scan all the dataset and check if there are missing files
+        # it runs after establishing the query_cache as it will update the cache if needed
+        # this will be useful in the future when query_cache is stored permanently
+        self.image_db_scan()
 
     def add_dataset(self, dataset_id):
         # dataset is a collection of image files
@@ -112,3 +117,10 @@ class ImageDB:
             self.query_cache[('get_images', dataset_id)] = query_result
 
         return query_result
+
+    def image_db_scan(self,
+                      dataset_id: str = None,
+                      image_id: str = None, file_name: str = None,
+                      checksum: bool = False, refresh_query: bool = False):
+
+        return
