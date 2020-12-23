@@ -48,7 +48,7 @@ class ImageDB:
         :param dataset_id: the name of the dataset
         :param folder_path: the path of the folder added
         :param checksum: append the checksum
-        :param how: if 'first', only add images in the original folder; 'all' add all images in the folder
+        :param how: if 'first', only add images in the original folder; if 'all', add all images in the folder
         :return: True, if successful
         """
         assert os.path.isdir(folder_path), "The folder not exists"
