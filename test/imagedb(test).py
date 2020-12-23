@@ -5,10 +5,14 @@ from ImageDB.imagedb import ImageDB
 
 class WidgetTestCase(unittest.TestCase):
     def setUp(self):
-        self.image_db = ImageDB(db_id='test_account', user_id="test_db", password=None, query_cache=False)
+        self.image_db = ImageDB(db_id='test_db', user_id="test_account", password="test", query_cache=False)
 
-    def test_default_widget_size(self):
-        self.assertTrue(self.image_db.add_dataset('test'), 'incorrect default size')
+    def test_add_image(self):
+        self.assertTrue(self.image_db.add_dataset('test'), 'fail to add the dataset')
 
-    def test_widget_resize(self):
-        self.assertTrue(self.image_db.add_image('test', 'image_test/19741_en_1.jpg'), 'wrong size after resize')
+    def test_add_test(self):
+        self.assertTrue(self.image_db.add_dataset('test'), 'fail to add the dataset')
+        self.assertTrue(self.image_db.add_image('test',
+                                                'C:/Users/user/PycharmProjects/ImageDB/image_test/19741_en_1.jpg',
+                                                True),
+                        'fail to add the image')

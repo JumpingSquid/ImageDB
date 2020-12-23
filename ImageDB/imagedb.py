@@ -40,11 +40,12 @@ class ImageDB:
         # currently the schema of a dataset will store the information of
         # image file with id, filepath, filename, and chksum
         cur.execute(f"CREATE TABLE {dataset_id} (image_id serial PRIMARY KEY, filepath varchar , filename varchar, chksum varchar );")
+        return True
 
     def add_image(self, dataset_id, filepath, checksum=False):
         # assert the file existence
         # default to close the checksum mechanism to avoid long processed time
-
+        print(filepath)
         assert os.path.isfile(filepath), "The file not exists"
 
         filename = filepath.split("/")[-1]
@@ -55,10 +56,11 @@ class ImageDB:
         if checksum:
             img_checksum = self.image_hashmap(file_path=filepath)
         cur.execute(f"INSERT INTO {dataset_id} (filepath, filename, chksum) VALUES ('{filepath}', '{filename}', '{img_checksum}')")
+        return True
 
     @staticmethod
     def image_hashmap(file_path):
-        assert os.path.isfile(file_path)
+        #assert os.path.isfile(file_path)
         md5hash = hashlib.md5(Image.open(file_path).tobytes()).hexdigest()
         return md5hash
 
