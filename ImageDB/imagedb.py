@@ -57,7 +57,7 @@ class ImageDB:
 
             elif how == 'all':
                 if os.path.isdir(fp):
-                    self.add_folder(dataset_id=dataset_id, folder_path=fp, checksum=checksum)
+                    self.add_folder(dataset_id=dataset_id, folder_path=fp, checksum=checksum, how=how)
         return True
 
     def add_image(self, dataset_id: str, filepath: str, checksum=False):
