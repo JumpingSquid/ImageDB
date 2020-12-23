@@ -42,16 +42,25 @@ class ImageDB:
         cur.execute(f"CREATE TABLE {dataset_id} (image_id serial PRIMARY KEY, filepath varchar , filename varchar, chksum varchar );")
         return True
 
-    def add_folder(self, dataset_id: str, folder_path: str, checksum=False):
+    def add_folder(self, dataset_id: str, folder_path: str, checksum=False, how='first'):
         assert os.path.isdir(folder_path), "The folder not exists"
         folder_path = os.path.abspath(folder_path)
         files = os.listdir(folder_path)
+
         for file in files:
             fp = os.path.join(folder_path, file)
-            self.add_image(dataset_id=dataset_id, filepath=fp, checksum=checksum)
+            if os.path.isfile(fp):
+                try:
+                    self.add_image(dataset_id=dataset_id, filepath=fp, checksum=checksum)
+                except IOError:
+                    pass
+
+            elif how == 'all':
+                if os.path.isdir(fp):
+                    self.add_folder(dataset_id=dataset_id, folder_path=fp, checksum=checksum)
         return True
 
-    def add_image(self, dataset_id, filepath, checksum=False):
+    def add_image(self, dataset_id: str, filepath: str, checksum=False):
         # assert the file existence
         # default to close the checksum mechanism to avoid long processed time
         assert os.path.isfile(filepath), "The file not exists"
