@@ -59,7 +59,7 @@ class ImageDB:
     @staticmethod
     def image_hashmap(file_path):
         assert os.path.isfile(file_path)
-        md5hash = hashlib.md5(Image.open(file_path).tobytes())
+        md5hash = hashlib.md5(Image.open(file_path).tobytes()).hexdigest()
         return md5hash
 
     def get_image(self, dataset_id, image_id=None, file_name=None, refresh=False) -> list:
