@@ -12,6 +12,7 @@ import io
 
 from PIL import Image
 from ImageDB.connector import Connector
+from ImageDB.engine import ImgSys
 
 
 class ImageDB:
@@ -28,10 +29,10 @@ class ImageDB:
         self.query_cache_flag = query_cache
         self.query_cache = {}
 
-        # scan all the dataset and check if there are missing files
-        # it runs after establishing the query_cache as it will update the cache if needed
-        # this will be useful in the future when query_cache is stored permanently
-        self.image_db_scan()
+        # img_sys_engine will run in background and manage the database passively.
+        # Its current job is to scan the database automatically and commit the transaction.
+        self.img_sys_engine = ImgSys(self.connector)
+        self.img_sys_engine.start_engine()
 
     def add_dataset(self, dataset_id):
         # dataset is a collection of image files
@@ -144,19 +145,3 @@ class ImageDB:
             self.query_cache[('get_images', dataset_id)] = query_result
 
         return query_result
-
-    def image_db_scan(self,
-                      dataset_id: str = None,
-                      image_id: str = None, file_name: str = None,
-                      checksum: bool = False, refresh_query: bool = False):
-        """
-        scan the database and validate the data
-        :param dataset_id:
-        :param image_id:
-        :param file_name:
-        :param checksum:
-        :param refresh_query:
-        :return:
-        """
-
-        return
