@@ -43,6 +43,14 @@ class ImageDB:
         return True
 
     def add_folder(self, dataset_id: str, folder_path: str, checksum=False, how='first'):
+        """
+        add image of a folder in the database
+        :param dataset_id: the name of the dataset
+        :param folder_path: the path of the folder added
+        :param checksum: append the checksum
+        :param how: if 'first', only add images in the original folder; 'all' add all images in the folder
+        :return: True, if successful
+        """
         assert os.path.isdir(folder_path), "The folder not exists"
         folder_path = os.path.abspath(folder_path)
         files = os.listdir(folder_path)
@@ -63,6 +71,7 @@ class ImageDB:
     def add_image(self, dataset_id: str, filepath: str, checksum=False):
         # assert the file existence
         # default to close the checksum mechanism to avoid long processed time
+        # TODO: check if the file is a valid image
         assert os.path.isfile(filepath), "The file not exists"
 
         filepath = os.path.abspath(filepath)
