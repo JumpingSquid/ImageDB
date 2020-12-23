@@ -52,7 +52,7 @@ class ImageDB:
             if os.path.isfile(fp):
                 try:
                     self.add_image(dataset_id=dataset_id, filepath=fp, checksum=checksum)
-                except IOError:
+                except:
                     pass
 
             elif how == 'all':
@@ -74,6 +74,7 @@ class ImageDB:
         if checksum:
             img_checksum = self.image_hashmap(file_path=filepath)
         cur.execute(f"INSERT INTO {dataset_id} (filepath, filename, chksum) VALUES ('{filepath}', '{filename}', '{img_checksum}')")
+        print(filename)
         return True
 
     @staticmethod

@@ -16,3 +16,11 @@ class WidgetTestCase(unittest.TestCase):
                                                 'C:/Users/user/PycharmProjects/ImageDB/image_test/19741_en_1.jpg',
                                                 True),
                         'fail to add the image')
+
+    def test_add_folder(self):
+        self.assertTrue(self.image_db.add_dataset('test'), 'fail to add the dataset')
+        self.assertTrue(self.image_db.add_folder('test',
+                                                 'C:/Users/user/PycharmProjects/ImageDB/image_test/',
+                                                 True,
+                                                 'all'),
+                        'fail to add the image')
