@@ -45,7 +45,6 @@ class ImageDB:
     def add_image(self, dataset_id, filepath, checksum=False):
         # assert the file existence
         # default to close the checksum mechanism to avoid long processed time
-        print(filepath)
         assert os.path.isfile(filepath), "The file not exists"
 
         filename = filepath.split("/")[-1]
@@ -60,7 +59,7 @@ class ImageDB:
 
     @staticmethod
     def image_hashmap(file_path):
-        #assert os.path.isfile(file_path)
+        assert os.path.isfile(file_path)
         md5hash = hashlib.md5(Image.open(file_path).tobytes()).hexdigest()
         return md5hash
 
