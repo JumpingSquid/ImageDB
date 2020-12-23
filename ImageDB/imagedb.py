@@ -42,12 +42,22 @@ class ImageDB:
         cur.execute(f"CREATE TABLE {dataset_id} (image_id serial PRIMARY KEY, filepath varchar , filename varchar, chksum varchar );")
         return True
 
+    def add_folder(self, dataset_id: str, folder_path: str, checksum=False):
+        assert os.path.isdir(folder_path), "The folder not exists"
+        folder_path = os.path.abspath(folder_path)
+        files = os.listdir(folder_path)
+        for file in files:
+            fp = os.path.join(folder_path, file)
+            self.add_image(dataset_id=dataset_id, filepath=fp, checksum=checksum)
+        return True
+
     def add_image(self, dataset_id, filepath, checksum=False):
         # assert the file existence
         # default to close the checksum mechanism to avoid long processed time
         assert os.path.isfile(filepath), "The file not exists"
 
-        filename = filepath.split("/")[-1]
+        filepath = os.path.abspath(filepath)
+        filename = filepath.split(os.sep)[-1]
         cur = self.connector.get_cursor()
 
         # create MD5 for image file
