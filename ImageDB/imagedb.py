@@ -13,7 +13,6 @@ import io
 from PIL import Image
 from ImageDB.connector import Connector
 from ImageDB.engine import ImgSys
-from psycopg2 import sql
 from psycopg2.extensions import AsIs
 
 
