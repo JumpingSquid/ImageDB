@@ -31,12 +31,12 @@ class Engine(threading.Thread):
         # it runs after establishing the query_cache as it will update the cache if needed
         # this will be useful in the future when query_cache is stored permanently
         self.update_counter += 1
-        print('auto scan completed')
+        print('INFO: Auto scan completed')
         return
 
     def image_db_commit(self):
         self.connector.db_commit()
-        print('auto database commit completed')
+        print('INFO: Auto database commit completed')
         return
 
 
