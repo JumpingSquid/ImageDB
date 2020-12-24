@@ -5,7 +5,9 @@ from ImageDB.imagedb import ImageDB
 
 class WidgetTestCase(unittest.TestCase):
     def setUp(self):
-        self.image_db = ImageDB(db_id='test_db', user_id="test_account", password="test", query_cache=False)
+        self.image_db = ImageDB(db_id='test_db', user_id="test_account", password="test",
+                                query_cache=False,
+                                cold_engine=True)
 
     def test_add_database(self):
         self.assertTrue(self.image_db.add_dataset('test'), 'fail to add the dataset')

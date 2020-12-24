@@ -13,11 +13,13 @@ import io
 from PIL import Image
 from ImageDB.connector import Connector
 from ImageDB.engine import ImgSys
+from psycopg2 import sql
+from psycopg2.extensions import AsIs
 
 
 class ImageDB:
 
-    def __init__(self, db_id: str, user_id: str, password: str, query_cache: bool):
+    def __init__(self, db_id: str, user_id: str, password: str, query_cache: bool, cold_engine: bool = False):
         self.connector = Connector(db_id=db_id, user_id=user_id, password=password)
 
         if ~self.connector.isconnect():
@@ -32,7 +34,8 @@ class ImageDB:
         # img_sys_engine will run in background and manage the database passively.
         # Its current job is to scan the database automatically and commit the transaction.
         self.img_sys_engine = ImgSys(self.connector)
-        self.img_sys_engine.start_engine()
+        if not cold_engine:
+            self.img_sys_engine.start_engine()
 
     def add_dataset(self, dataset_id):
         # dataset is a collection of image files
@@ -40,7 +43,8 @@ class ImageDB:
 
         # currently the schema of a dataset will store the information of
         # image file with id, filepath, filename, and chksum
-        cur.execute(f"CREATE TABLE {dataset_id} (image_id serial PRIMARY KEY, filepath varchar , filename varchar, chksum varchar );")
+        cur.execute("CREATE TABLE %(dataset_id)s (image_id serial PRIMARY KEY, filepath varchar , filename varchar, chksum varchar );",
+                    {"dataset_id": AsIs(dataset_id)})
         return True
 
     def add_folder(self, dataset_id: str, folder_path: str, checksum=False, how='first'):
@@ -83,7 +87,9 @@ class ImageDB:
         img_checksum = None
         if checksum:
             img_checksum = self.image_hashmap(file_path=filepath)
-        cur.execute(f"INSERT INTO {dataset_id} (filepath, filename, chksum) VALUES ('{filepath}', '{filename}', '{img_checksum}')")
+        cur.execute("INSERT INTO %(dataset_id)s (filepath, filename, chksum) VALUES (%(filepath)s, %(filename)s, %(img_checksum)s)",
+                    {'dataset_id': AsIs(dataset_id),
+                     'filepath': filepath, 'filename': filename, 'img_checksum': img_checksum})
         print(filename)
         return True
 
@@ -93,33 +99,35 @@ class ImageDB:
         md5hash = hashlib.md5(Image.open(file_path).tobytes()).hexdigest()
         return md5hash
 
-    def get_image(self, dataset_id, image_id=None, file_name=None, refresh=False) -> list:
+    def get_image(self, dataset_id, image_id=None, filename=None, refresh=False) -> list:
         """
         get image based on id or filename from a dataset
         :param dataset_id: the name of the dataset
         :param image_id: the id of the image
-        :param file_name: the filename of the image
+        :param filename: the filename of the image
         :param refresh: skip the cache if true
         :return: [(image_id, filepath, filename, chksum), ...]
         """
 
         # if the cache function is turned on, then first find from the cache
-        if self.query_cache_flag and ((dataset_id, image_id, file_name) in self.query_cache) and (not refresh):
-            return self.query_cache[(dataset_id, image_id, file_name)]
+        if self.query_cache_flag and ((dataset_id, image_id, filename) in self.query_cache) and (not refresh):
+            return self.query_cache[(dataset_id, image_id, filename)]
 
         #
-        assert image_id or file_name, 'Image id or the file name should provide at least one'
+        assert image_id or filename, 'Image id or the file name should provide at least one'
         cur = self.connector.get_cursor()
         if image_id:
-            cur.execute(f"SELECT * FROM {dataset_id} WHERE image_id = {image_id}")
-        elif file_name:
-            cur.execute(f'SELECT * FROM {dataset_id} WHERE filename = {file_name}')
+            cur.execute("SELECT * FROM %(dataset_id)s WHERE image_id = %(image_id)s",
+                        {'dataset_id': AsIs(dataset_id), 'image_id': image_id})
+        elif filename:
+            cur.execute('SELECT * FROM %(dataset_id)s WHERE filename = %(filename)s',
+                        {'dataset_id': AsIs(dataset_id), 'file_name': filename})
 
         query_result = cur.fetchall()
 
         # if the cache function is turned on, store the result
         if self.query_cache_flag:
-            self.query_cache[('get_image', dataset_id, image_id, file_name)] = query_result
+            self.query_cache[('get_image', dataset_id, image_id, filename)] = query_result
 
         return query_result
 
@@ -137,7 +145,8 @@ class ImageDB:
 
         # get all the image form a dataset
         cur = self.connector.get_cursor()
-        cur.execute(f"SELECT * FROM {dataset_id};")
+        cur.execute("SELECT * FROM %(dataset_id)s;",
+                    {"dataset_id": AsIs(dataset_id)})
         query_result = cur.fetchall()
 
         # if the cache function is turned on, store the result
